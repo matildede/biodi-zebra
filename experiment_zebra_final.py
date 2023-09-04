@@ -7,10 +7,10 @@ from pathlib import Path
 import os
 
 # Define and set monitor properties
-PIXELS_MONITOR = [1920, 1080]
+PIXELS_MONITOR = [1920, 1080] # [width, height] of the monitor in pixels
 myMon = monitors.Monitor('asus')
 myMon.setWidth(53.06)  # Set the width of the monitor in cm
-myMon.setSizePix(PIXELS_MONITOR)
+myMon.setSizePix(PIXELS_MONITOR) # Set the size of the monitor in pixels
 
 #Metadata dictionary
 data_dict = {
@@ -36,12 +36,12 @@ data_dict = {
                 'pause_duration': 1800,  # 1800 seconds = 30 min
                 'stimuli_duration': 300,  # 300 seconds = 5 min
                 'num_chambers': 3,
-                'size_dots_cm': 0.15 #RANGE ANIMALS 0.6-1.8 mm
+                'size_dots_cm': 0.15 #RANGE ANIMALS 0.8-1.8 mm
     }
 }
 
 #open GUI for metadata
-dlg = gui.DlgFromDict(data_dict['experiment_metadata'], title="Experiment metadata", sortKeys=False) #(and from psychopy import gui at top of script)
+dlg = gui.DlgFromDict(data_dict['experiment_metadata'], title="Experiment metadata", sortKeys=False)
 if not dlg.OK:
     core.quit()
 
@@ -61,14 +61,14 @@ filename = data_dict['experiment_metadata']['date'] + "_" + \
            data_dict['experiment_metadata']['experimental_group'] + '.csv'
 
 new_path = path / data_dict['experiment_metadata']['date'][:10] / ('ID' + str(data_dict['experiment_metadata']['session'])) / 'metadata'
-tracking_path_folder = path / data_dict['experiment_metadata']['date'][:10] / ('ID' + str(data_dict['experiment_metadata']['session'])) / 'tracking'
+tracking_path_folder = path / data_dict['experiment_metadata']['date'][:10] / ('ID' + str(data_dict['experiment_metadata']['session'])) / 'tracking' # create a new folder for bonsai video files
 new_path.mkdir(exist_ok=True, parents=True)
 tracking_path_folder.mkdir(exist_ok=True, parents=True)
 
 if data_dict['experiment_metadata']['experiment_name'] != "":
     metadata_df.to_csv(new_path / filename, index=False)
 
-# Import dataframe
+# Import stimuli dataframe
 # Set directory
 path = r"C:\Users\matilde.perrino\Documents\GitHub\biodi-zebra\stimuli"
 
@@ -80,31 +80,26 @@ df_screen2 = pd.read_csv(path + f"\df_{data_dict['experiment_metadata']['screen2
                        f"{data_dict['experiment_metadata']['screen2_number_dots']}_"
                        f"speed{data_dict['experiment_metadata']['screen2_speed']}.csv")
 
-
-
 # dataframes
-
 df_screen1_tot = [copy.copy(df_screen1) for i in range(data_dict['stimuli_parameters']['num_chambers'])]
 df_screen2_tot = [copy.copy(df_screen2) for i in range(data_dict['stimuli_parameters']['num_chambers'])]
 df_tot = [df_screen1_tot, df_screen2_tot]
 
+
 # 1. Draw a grid of red lines to adjust the setup at the beginning of the experiment.
+# Coordinates and variables for drawing grid lines to align the setup at the beginning of the experiment
+WIDTH_LINES_cm = 0.5 # width of the lines in cm
+LENGTH_LINES_cm = 11 # length of the lines in cm
+NUMBER_OF_LINES = 4 # number of lines to draw
+COORDINATES_LINES_cm = [15.25, 6.4]  # x and y coordinates of the first line (rectangle psychopy)
 
-# Coordinates and variables for drawing grid lines
-WIDTH_LINES_cm = 0.5
-LENGTH_LINES_cm = 11
-NUMBER_OF_LINES = 4
-COORDINATES_LINES_cm = [15.25, 6.4]  # x and y coordinates of the first line
-
-# Coordinates and variables for setting cells where to draw stimuli
+# Coordinates and variables for setting cells (areas where stimuli will be displayed)
 NUM_CHAMBERS = 3
 WIDTH_CELL_cm = 6
-x_RANGE_CELL_cm = [np.array([15.5, 21.5]) + (WIDTH_CELL_cm + WIDTH_LINES_cm) * i for i in range(NUM_CHAMBERS)]
-x_RANGE_CELL_cm_small = [np.array([17.5, 19.5]) + (WIDTH_CELL_cm + WIDTH_LINES_cm) * i for i in range(NUM_CHAMBERS)]
-y_RANGE_CELL_cm = [0.9, 6.9]
-y_RANGE_CELL_cm_small = [2.9, 4.9]
+x_RANGE_CELL_cm = [np.array([15.5, 21.5]) + (WIDTH_CELL_cm + WIDTH_LINES_cm) * i for i in range(NUM_CHAMBERS)] # x coordinates
+y_RANGE_CELL_cm = [0.9, 6.9] # y coordinates
 
-#        STEP. 1 Define and transform points coordinates from cm to px
+# STEP. 1 Define and transform points coordinates from cm to px
 # Lines coordinates
 coordinates_lines_px = []
 for line in range(NUMBER_OF_LINES):
@@ -112,33 +107,31 @@ for line in range(NUMBER_OF_LINES):
     y_point = tools.monitorunittools.cm2pix(COORDINATES_LINES_cm[1], myMon)
     coordinates_lines_px.append([x_point, y_point])
 
-width_lines_px = tools.monitorunittools.cm2pix(WIDTH_LINES_cm, myMon)
-length_lines_px = tools.monitorunittools.cm2pix(LENGTH_LINES_cm, myMon)
+width_lines_px = tools.monitorunittools.cm2pix(WIDTH_LINES_cm, myMon)  # width of the lines in px
+length_lines_px = tools.monitorunittools.cm2pix(LENGTH_LINES_cm, myMon) # length of the lines in px
 
-# Cell range coordinates
+# Cell range coordinates (areas where stimuli will be displayed)
 x_RANGE_CELL_px = []
 for i in range(NUM_CHAMBERS):
     x_range_points_px = [tools.monitorunittools.cm2pix(x_RANGE_CELL_cm[i][j], myMon) for j in range(len(x_RANGE_CELL_cm[i]))]
     x_RANGE_CELL_px.append(x_range_points_px)
 
-x_RANGE_CELL_px_small = []
-for i in range(NUM_CHAMBERS):
-    x_range_points_px = [tools.monitorunittools.cm2pix(x_RANGE_CELL_cm_small[i][j], myMon) for j in range(len(x_RANGE_CELL_cm_small[i]))]
-    x_RANGE_CELL_px_small.append(x_range_points_px)
-
 y_RANGE_CELL_px = [tools.monitorunittools.cm2pix(y_RANGE_CELL_cm[j], myMon) for j in range(len(y_RANGE_CELL_cm))]
-y_RANGE_CELL_px_small = [tools.monitorunittools.cm2pix(y_RANGE_CELL_cm_small[j], myMon) for j in range(len(y_RANGE_CELL_cm_small))]
-# Translate each dataframe points according to the range of the cells
-
 
 def translate(original_value, scala_min, scala_max):
     """
     This function traslate a normalized value on a scale 0-1 in a desired scale
     within the range from scala_min to scala_max
+
+    :param original_value: value to be translated
+    :param scala_min: minimum value of the desired scale
+    :param scala_max: maximum value of the desired scale
+
+    :return: translated value
     """
     return (scala_max - scala_min) * original_value + scala_min
 
-
+# Translate dataframe points according to the range of the cells
 for idx, df_screen in enumerate(df_tot):
     for num, df_sub in enumerate(df_screen):
         n_biods = len(df_sub.columns) // 2 - 1
@@ -148,15 +141,14 @@ for idx, df_screen in enumerate(df_tot):
 
 
 # Initialize objects
-# 1. Create a window
-# origin: downward on the left, coordinates: x values positive on the right, y values positive going up
+# 1. Initialize windows
+# setting origin: bottom left, coordinates: x values positive on the right, y values positive going up
 window_1 = visual.Window([1920, 1080], color=(255, 255, 255), viewPos=(-PIXELS_MONITOR[0] / 2, - PIXELS_MONITOR[1] / 2),
                          fullscr=True, units='pix', screen=1, monitor=myMon)
 window_2 = visual.Window([1920, 1080], color=(255, 255, 255), viewPos=(-PIXELS_MONITOR[0] / 2, - PIXELS_MONITOR[1] / 2),
                          fullscr=True, units='pix', screen=2, monitor=myMon)
 
-
-# 2. Create red lines for setup grid
+# 2. Initialize red lines for setup grid
 windows_list = [window_1, window_2]
 lines = []
 
@@ -166,7 +158,7 @@ for window in windows_list:
                            pos=(coordinates_lines_px[i][0], coordinates_lines_px[i][1]), fillColor='red')
         lines.append(rect)
 
-# 3. Create boids
+# 3. Initialize biods
 biods_tot = []
 size_dots = tools.monitorunittools.cm2pix(data_dict['stimuli_parameters']['size_dots_cm'], myMon)
 
@@ -181,23 +173,21 @@ for idx, window in enumerate(windows_list):
         screen_biods_list.append(biods_sublist)
     biods_tot.append(screen_biods_list)
 
-# 4. Create video
+# 4. Initialize video
+if data_dict['experiment_metadata']['experimental_group'] == 'exp-realfish-empty':
+    zebra_video = r"\\cimec-storage5\acn_lab\shared_acn\Matilde\zebrafish\biodi_experiment\stimuli\zebra_6wpf_group.mp4"
+    emptytank_video = r"\\cimec-storage5\acn_lab\shared_acn\Matilde\zebrafish\biodi_experiment\stimuli\empty_tank.mp4"
 
-zebra_video = r"\\cimec-storage5\acn_lab\shared_acn\Matilde\zebrafish\biodi_experiment\stimuli\zebra_6wpf_group.mp4"
-emptytank_video = r"\\cimec-storage5\acn_lab\shared_acn\Matilde\zebrafish\biodi_experiment\stimuli\empty_tank.mp4"
+    video1_win1 = visual.MovieStim(window_1, filename=zebra_video, pos=(18.5, 3.9), anchor='center', size=(6, 6), units='cm')
+    video2_win1 = visual.MovieStim(window_1, filename=zebra_video, pos=(25, 3.9), anchor='center', size=(6, 6), units='cm')
+    video3_win1 = visual.MovieStim(window_1, filename=zebra_video, pos=(31.5, 3.9), anchor='center', size=(6, 6), units='cm')
 
+    video1_win2 = visual.MovieStim(window_2, filename=emptytank_video, pos=(18.5, 3.9), anchor='center', size=(6, 6), units='cm')
+    video2_win2 = visual.MovieStim(window_2, filename=emptytank_video, pos=(25, 3.9), anchor='center', size=(6, 6), units='cm')
+    video3_win2 = visual.MovieStim(window_2, filename=emptytank_video, pos=(31.5, 3.9), anchor='center', size=(6, 6), units='cm')
 
-video1_win1 = visual.MovieStim(window_1, filename=zebra_video, pos=(18.5, 3.9), anchor='center', size=(6, 6), units='cm')
-video2_win1 = visual.MovieStim(window_1, filename=zebra_video, pos=(25, 3.9), anchor='center', size=(6, 6), units='cm')
-video3_win1 = visual.MovieStim(window_1, filename=zebra_video, pos=(31.5, 3.9), anchor='center', size=(6, 6), units='cm')
-
-video1_win2 = visual.MovieStim(window_2, filename=emptytank_video, pos=(18.5, 3.9), anchor='center', size=(6, 6), units='cm')
-video2_win2 = visual.MovieStim(window_2, filename=emptytank_video, pos=(25, 3.9), anchor='center', size=(6, 6), units='cm')
-video3_win2 = visual.MovieStim(window_2, filename=emptytank_video, pos=(31.5, 3.9), anchor='center', size=(6, 6), units='cm')
 # Workflow presentation
-
 # 1. Draw grids for setup alignment
-
 for rect in lines:
     rect.draw()
 
@@ -205,8 +195,9 @@ window_1.flip()
 window_2.flip()
 event.waitKeys()
 
-# 2. Initial Pause
+# 2. Initial Habituation Pause
 pause_clock = core.Clock()
+
 while pause_clock.getTime() < data_dict['stimuli_parameters']['pause_duration']:
     window_1.flip()
     window_2.flip()
@@ -216,7 +207,7 @@ while pause_clock.getTime() < data_dict['stimuli_parameters']['pause_duration']:
     if 'escape' in event.getKeys():
         break
 
-# 3. Boid Presentation
+# 3. Biods Presentation
 t = df_screen1['t'] / 30   # 30 frame per second
 
 expClock = core.Clock()
@@ -243,8 +234,8 @@ while expClock.getTime() < data_dict['stimuli_parameters']['stimuli_duration']:
 
         for screen in biods_tot:
             for sublist in screen:
-                for boid in sublist:
-                    boid.draw()
+                for biod in sublist:
+                    biod.draw()
 
     window_1.flip()
     window_2.flip()
