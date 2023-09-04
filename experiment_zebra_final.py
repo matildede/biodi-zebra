@@ -4,7 +4,6 @@ import scipy
 import numpy as np
 from psychopy import visual, event, core, tools, data, gui, monitors
 from pathlib import Path
-import os
 
 # Define and set monitor properties
 PIXELS_MONITOR = [1920, 1080] # [width, height] of the monitor in pixels
