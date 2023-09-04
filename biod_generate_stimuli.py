@@ -21,10 +21,10 @@ class biod:
         # initial null acceleration
         self.acceleration = np.array([0, 0])
 
-        # limit the magnitude steering force.
+        # limit the magnitude of the steering force.
         self.maxForce = 2
 
-        # limit the magnitude of velocity, i.e. speed.
+        # limit the magnitude of velocity, i.e. speed
         self.maxSpeed = maxSpeed
 
     def random(self, magnitude):
@@ -48,8 +48,8 @@ class biod:
 
         # Scale the three steering forces and add them together
         alignment = alignment * 1 * scaling_factor  # 1
-        cohesion = cohesion * 0.4 * scaling_factor # 0.6 (6), 0.5 (3) 1.1 or 2.4
-        separation = separation * 2.5 * scaling_factor # 1.6 or 2.5
+        cohesion = cohesion * 0.4 * scaling_factor # 1 (12) 0.6 (6), 0.5 (3)
+        separation = separation * 2.5 * scaling_factor # 2.5
 
         self.acceleration = self.acceleration + alignment + cohesion + separation
 
@@ -57,79 +57,64 @@ class biod:
         """
         This method calculates the average velocity of all the other biods and set it as the desired.
         Indeed, this average vector indicates the mean direction of all the other boids
+        :param biods: all the other biod objects in the shoal with their properties
+        :return: steer (steering force)
         """
-        perception = 100
-        tot_velocity = np.array([0, 0])
+        perception = 100 # radius of the circle within which the boids are considered neighbors
+        tot_velocity = np.array([0, 0]) # initialize the total velocity of the neighbors
         count = 0
         steer = np.array([0, 0])
 
         for other in biods:
-            d = np.linalg.norm(self.location - other.location)  # magnitude of the distance between the two points
-            if other is not self and d < perception:
-                tot_velocity = tot_velocity + other.velocity  # add all the velocities
-                # print(tot_velocity)
-                # print(other.velocity)
+            d = np.linalg.norm(self.location - other.location) # magnitude of the distance between the two points
+            if other is not self and d < perception: # if the other boid is not itself and is within the perception radius
+                tot_velocity = tot_velocity + other.velocity # add all the velocities of the neighbors
                 count += 1
 
         if count > 0:
-            # print(count)
-            average_velocity = tot_velocity / count  # calculate desired velocity = average velocity of other boids
-            # print(desired_velocity)
-            desired_velocity = (average_velocity / np.linalg.norm(
-                average_velocity)) * self.maxSpeed  # normalize and set the magnitude of the vector to maxSpeed
-            # print(desired_velocity)
+            average_velocity = tot_velocity / count  # average velocity that will be used for calculating desired velocity
+            desired_velocity = (average_velocity / np.linalg.norm( average_velocity)) * self.maxSpeed  # normalize and set the magnitude of the vector to maxSpeed
             steer = desired_velocity - self.velocity  # calculates the steering force
-            # in base a cosa hai scelto la max force?
+
             if np.linalg.norm(steer) < self.maxForce:
                 pass
             else:
-                # limit the magnitude but maintain the direction of the vector:
-                direction = math.atan2(steer[1], steer[0]) / math.pi * 180  # non capisco bene cosa faccia qui
-                # print(f'x = {steer[0]}  y = {steer[1]}  direction = {direction}')
-                steer[0] = self.maxForce * np.cos(np.radians(direction))
-                steer[1] = self.maxForce * np.sin(np.radians(direction))
-                # print(steer[0])
-                # print(steer[1])
+                # limit the magnitude of the steer vector within the range +- maxForcelimit but maintain the direction
+                direction = math.atan2(steer[1], steer[0]) / math.pi * 180 # calculate the direction of the vector
+                steer[0] = self.maxForce * np.cos(np.radians(direction)) # calculate the x component of the vector
+                steer[1] = self.maxForce * np.sin(np.radians(direction)) # calculate the y component of the vector
 
-            # print(f'steer = {steer}')
-
-        # print(f'count = {count}')
-        # print(f'steer = {steer}')
         return steer
 
     def cohesion(self, biods):
         """
         This method calculates the average location of the biod's neighbors and set it as the target to seek.
         According to it, it calculates desired velocity and steering force.
-        :param biods:
-        :return:
+        :param biods: all the other biod objects in the shoal with their properties
+        :return: steer (steering force)
         """
-        perception = 500
-        tot_location = np.array([0, 0])
+        perception = 500 # radius of the circle within which the boids are considered neighbors
+        tot_location = np.array([0, 0]) # initialize the total location of the neighbors
         count = 0
         steer = np.array([0, 0])
 
         for other in biods:
-            d = np.linalg.norm(self.location - other.location)
-            if other is not self and d < perception:
-                # add all the others' locations
-                tot_location = tot_location + other.location
+            d = np.linalg.norm(self.location - other.location) # magnitude of the distance between the two points
+            if other is not self and d < perception: # if the other boid is not itself and is within the perception radius
+                tot_location = tot_location + other.location # add all the locations of the neighbors
                 count += 1
         if count > 0:
-            # average location that will be used for calculating desired velocity
-            average_location = tot_location / count
-            # calculate desired velocity = distance between self.location and average location of other boids
-            desired_velocity = average_location - self.location
-            # normalize and set the magnitude of the vector to maxSpeed
-            desired_velocity = (desired_velocity / np.linalg.norm(desired_velocity)) * self.maxSpeed
+            average_location = tot_location / count # average location that will be used for calculating desired velocity
+            desired_velocity = average_location - self.location  # calculate desired velocity = distance between self.location and average location of other boids
+            desired_velocity = (desired_velocity / np.linalg.norm(desired_velocity)) * self.maxSpeed # normalize and set the magnitude of the vector to maxSpeed
             steer = desired_velocity - self.velocity  # calculates the steering force
             if np.linalg.norm(steer) < self.maxForce:
                 pass
             else:
                 # limit the magnitude of the steer vector within the range +- maxForcelimit but maintain the direction
-                direction = math.atan2(steer[1], steer[0]) / math.pi * 180  # non capisco bene cosa faccia qui
-                steer[0] = self.maxForce * np.cos(np.radians(direction))
-                steer[1] = self.maxForce * np.sin(np.radians(direction))
+                direction = math.atan2(steer[1], steer[0]) / math.pi * 180 # calculate the direction of the vector
+                steer[0] = self.maxForce * np.cos(np.radians(direction)) # calculate the x component of the vector
+                steer[1] = self.maxForce * np.sin(np.radians(direction)) # calculate the y component of the vector
         return steer
 
     def separation(self, biods):
@@ -138,25 +123,23 @@ class biod:
         in order to avoid colliding with its neighbors.
         :param self: biod for which the steering force is calculated
         :param biods: all the other biod objects in the shoal with their properties
-        :return: steering force
+        :return: steer (steering force)
         """
-        perception = 100
-        tot_distance = np.array([0, 0])
+        perception = 100 # radius of the circle within which the boids are considered neighbors
+        tot_distance = np.array([0, 0]) # initialize the total distance of the neighbors
         count = 0
         steer = np.array([0, 0])
 
         for other in biods:
             d = np.linalg.norm(self.location - other.location)
-            if other is not self and d < perception:
+            if other is not self and d < perception: # if the other boid is not itself and is within the perception radius
                 # calculate desired velocity as a vector pointing away from the other's location
-                distance = self.location - other.location
-                # normalize the distance vector
-                distance = distance / np.linalg.norm(distance)
-                # add the direction for the desired velocity with respect to each other biod
-                tot_distance = tot_distance + distance
+                distance = self.location - other.location # calculate the distance between the two points
+                distance = distance / np.linalg.norm(distance)  # normalize the distance vector
+                tot_distance = tot_distance + distance # add all the distances of the neighbors
                 count += 1
         if count > 0:
-            # average of the desired velocity
+
             desired_velocity = tot_distance / count
             # normalize and set the magnitude of the vector to maxSpeed
             desired_velocity = (desired_velocity / np.linalg.norm(desired_velocity)) * self.maxSpeed
@@ -165,7 +148,7 @@ class biod:
                 pass
             else:
                 # limit the magnitude of the steer vector within the range +- maxForcelimit but maintain the direction
-                direction = math.atan2(steer[1], steer[0]) / math.pi * 180  # non capisco bene cosa faccia qui
+                direction = math.atan2(steer[1], steer[0]) / math.pi * 180
                 steer[0] = self.maxForce * np.cos(np.radians(direction))
                 steer[1] = self.maxForce * np.sin(np.radians(direction))
         return steer
@@ -214,12 +197,13 @@ class biod:
 
 if __name__ == '__main__':
 
-    experimental_group = 'flock'  # 'flock', 'random1', 'random2', 'random3'
+    experimental_group = 'flock'  # 'flock', 'random1', 'random2'
     n_biods = 3  #3 or 6
     maxSpeed = 6  # 6, 12, 24
     minutes = 5
     framerate = 30
-    time_points = minutes * framerate * 60 + 10  # + 10 so to have a slightly bigger dataframe and avoid crashing of psychopy
+    seconds = 60
+    time_points = minutes * framerate * seconds + 10  # + 10 so to have a slightly bigger dataframe and avoid crashing of psychopy
 
     shoal = []
     x_max = 700  # width of my window
@@ -230,10 +214,6 @@ if __name__ == '__main__':
 
     for i in range(n_biods):
         shoal.append(biod(x_max, y_max, maxSpeed))
-        if experimental_group == 'random3':
-            shoal[0].location = np.array([0, 450])
-            shoal[0].velocity = np.array([1, 0])
-
 
     # Here I update the positions of my biods and apply the forces defined in flock().
     # I also create a big list with the positions in x and y of all my biods for each frame
@@ -250,7 +230,7 @@ if __name__ == '__main__':
     count = 0
     for t in range(time_points):
         count += 1
-        for i, biod in enumerate(shoal):  # this loop return an index i for each element biod in shoal
+        for i, biod in enumerate(shoal):
             if experimental_group == 'flock':
                 print(experimental_group)
                 biod.flock(shoal)
@@ -276,8 +256,8 @@ if __name__ == '__main__':
 
 
 # dataframe for different experimental groups
-# df_biod_(type of movement:flock,random1,random2)_(number:3,4,6)_(speed:4,8,12)
-# es. df_biod_flock_3_speed4
+# df_biod_(type of movement:flock,random1,random2)_(number:3,4,6)_(speed:3,6,12)
+# es. df_biod_flock_3_speed3
 
 path = r'D:\Users\matilde.perrino\Documents\zebra\biodi_experiment\stimuli\\'
 
