@@ -24,7 +24,7 @@ class biod:
         # limit the magnitude of the steering force.
         self.maxForce = 2
 
-        # limit the magnitude of velocity, i.e. speed
+        # limit the magnitude of velocity
         self.maxSpeed = maxSpeed
 
     def random(self, magnitude):
@@ -48,7 +48,7 @@ class biod:
 
         # Scale the three steering forces and add them together
         alignment = alignment * 1 * scaling_factor  # 1
-        cohesion = cohesion * 0.4 * scaling_factor # 1 (12) 0.6 (6), 0.5 (3)
+        cohesion = cohesion * 0.6 * scaling_factor # 1 (12) 0.6 (6), 0.5 (3)
         separation = separation * 2.5 * scaling_factor # 2.5
 
         self.acceleration = self.acceleration + alignment + cohesion + separation
@@ -209,17 +209,13 @@ if __name__ == '__main__':
     x_max = 700  # width of my window
     y_max = 700  # height of my window
 
-    # Here I initialize my objects. In this way I attribute to each of them one of the class biod attributes
-    # eg. location, velocity, acceleration etc.
-
+    # Here I initialize my objects. 
     for i in range(n_biods):
         shoal.append(biod(x_max, y_max, maxSpeed))
 
     # Here I update the positions of my biods and apply the forces defined in flock().
     # I also create a big list with the positions in x and y of all my biods for each frame
-    # and for each time point. I also create a list where I specify the identity of each biod
-    # in order to check later if I made some mistake.
-
+    # and for each time point. 
 
     time = []
 
