@@ -70,7 +70,7 @@ if data_dict['experiment_metadata']['experiment_name'] != "":
 
 # Import dataframe
 # Set directory
-path = r"D:\Users\matilde.perrino\Documents\zebra\biodi_experiment\stimuli"
+path = r"C:\Users\matilde.perrino\Documents\GitHub\biodi-zebra\stimuli"
 
 df_screen1 = pd.read_csv(path + f"\df_{data_dict['experiment_metadata']['screen1_stimulus']}_"
                        f"{data_dict['experiment_metadata']['screen1_number_dots']}_"
