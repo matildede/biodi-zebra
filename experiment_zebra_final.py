@@ -40,6 +40,7 @@ data_dict = {
 }
 
 #open GUI for metadata
+# LP: nice!
 dlg = gui.DlgFromDict(data_dict['experiment_metadata'], title="Experiment metadata", sortKeys=False)
 if not dlg.OK:
     core.quit()
@@ -85,6 +86,7 @@ df_screen2_tot = [copy.copy(df_screen2) for i in range(data_dict['stimuli_parame
 df_tot = [df_screen1_tot, df_screen2_tot]
 
 
+# LP: msaybe you can keep track of those with the metadata above as well
 # 1. Draw a grid of red lines to adjust the setup at the beginning of the experiment.
 # Coordinates and variables for drawing grid lines to align the setup at the beginning of the experiment
 WIDTH_LINES_cm = 0.5 # width of the lines in cm
@@ -173,6 +175,9 @@ for idx, window in enumerate(windows_list):
     biods_tot.append(screen_biods_list)
 
 # 4. Initialize video
+# LP: msyb keep the paths in the metadata as well.
+# Also, you can organise all those videos in a single data structure (a dictionary of lists?)
+# so that you can loop in one line eg to draw them (line 222)
 if data_dict['experiment_metadata']['experimental_group'] == 'exp-realfish-empty':
     zebra_video = r"\\cimec-storage5\acn_lab\shared_acn\Matilde\zebrafish\biodi_experiment\stimuli\zebra_6wpf_group.mp4"
     emptytank_video = r"\\cimec-storage5\acn_lab\shared_acn\Matilde\zebrafish\biodi_experiment\stimuli\empty_tank.mp4"

@@ -197,6 +197,10 @@ class biod:
 
 if __name__ == '__main__':
 
+    # LP: if the data generation is very fast (?), you can generate the dataframe
+    # of biods velocities in the experiment script - in this way, the biods generation
+    # parameters can be put together with the rest of the experiment parameters!
+    # You can still keep the biod class in a separate file, and import it in the experiment script.
     experimental_group = 'flock'  # 'flock', 'random1', 'random2'
     n_biods = 3  #3 or 6
     maxSpeed = 6  # 6, 12, 24
@@ -228,7 +232,6 @@ if __name__ == '__main__':
         count += 1
         for i, biod in enumerate(shoal):
             if experimental_group == 'flock':
-                print(experimental_group)
                 biod.flock(shoal)
             elif experimental_group == 'random1':
                 if count%5 == 0:
@@ -236,7 +239,7 @@ if __name__ == '__main__':
             elif experimental_group == 'random3':
                     biod.random2(maxSpeed/2)
             speed = biod.update()
-            print(speed)
+
             biod.borders(x_max, y_max, limit=50)  # 50 or 150
             exec(f'biod{i}_x.append(biod.location[0])')
             exec(f'biod{i}_y.append(biod.location[1])')
